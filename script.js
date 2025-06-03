@@ -9,12 +9,31 @@ function reload() {
 }
 
 async function fetchNews(query) {
-    const res = await fetch(`${url}${query}&apiKey=${API_KEY}`);
-    const data = await res.json();
-    bindData(data.articles);
+    try {
+        const res = await fetch(`${url}${query}&apiKey=${API_KEY}`);
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status} - ${res.statusText}`);
+        }
+        const data = await res.json();
+
+        if (!data.articles) {
+            console.error("No articles found in response:", data);
+            return;
+        }
+
+        bindData(data.articles);
+    } catch (error) {
+        console.error("Failed to fetch news:", error);
+        alert("Sorry, failed to load news. Please try again later.");
+    }
 }
 
 function bindData(articles) {
+    if (!articles || articles.length === 0) {
+        console.warn("No articles to display");
+        return;
+    }
+
     const cardsContainer = document.getElementById("cards-container");
     const newsCardTemplate = document.getElementById("template-news-card");
 
